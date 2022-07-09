@@ -1,52 +1,52 @@
 import csv
 import sys
 import pandas as pd
+from dslr_utils import print_error, print_exit
+from dslr_math import *
 
-err = "Error: "
 fmt = ':>12.4f'
+
+'''
+column is 'NaN column' if it has more than 50% of NaN values 
+'''
+
+    
 
 def describe():
     if len(sys.argv) > 1:
         filepath = sys.argv[1]
     else:
-        print('Usage: ./describe \'filepath\'')
-        sys.exit(0)
-    df = None
-  
+        print_exit('Usage: ./describe \'filepath\'')
+
     try:
         df = pd.read_csv(filepath, delimiter=',', index_col=0)
     except FileNotFoundError:
-        sys.exit(err + "Invalid filepath")
+        print_error("Invalid filepath")
     except PermissionError as e:
-        sys.exit(err + "Permission denied")
+        print_error("Permission denied")
     except pd.errors.EmptyDataError as e:
-        sys.exit(err + "File is empty")
+        print_error("File is empty")
     except Exception:
         raise RuntimeError("Unknown error, read stacktrace")
 
-    header = 1
-    print(
-        f'{"":15} |{"Count":>12} |{"Mean":>12} |{"Std":>12} |{"Min":>12} |{"25%":>12} |{"50%":>12} |{"75%":>12} |{"Max":>12}')
-    sys.exit(0)
-    only_num = df.select_dtypes('number')
-    print(only_num)
-    print(list(only_num.columns))
-    exit(0)
-
-    for x in [count_(data), mean_(data), std_(data), ]
-    print(f'{values}{format}'.format(values=, format=fmt), end=' |')
-    print(f'{values}{format}'.format(values=, format=fmt), end=' |')
-    print(f'{values}{format}'.format(values=, format=fmt), end=' |')
-
-    print(f'{mean_(data):>12.4f}', end=' |')
-    print(f'{std_(data):>12.4f}', end=' |')
-    print(f'{min_(data):>12.4f}', end=' |')
-    print(f'{percentile_(data, 25):>12.4f}', end=' |')
-    print(f'{percentile_(data, 50):>12.4f}', end=' |')
-    print(f'{percentile_(data, 75):>12.4f}', end=' |')
-    print(f'{max_(data):>12.4f}')
+    df_out = df.select_dtypes('number')
+    for col in df_out:
+        if isnan_column(df_out[col]):
+            df_out.drop(col, axis=1, inplace=True)
+    df_out = df_out.apply(pd.to_numeric)
+    
+    print(f'{"":15} |{"Count":>12} |{"Mean":>12} |{"Std":>12} |{"Min":>12} |{"25%":>12} |{"50%":>12} |{"75%":>12} |{"Max":>12}')
+    for col in df_out:
+        column = df_out[col]
+        for calculated in [count_(column), mean_(column), std_(column), min_(column),
+                           percentile_(column, 25), percentile_(column, 50),
+                           percentile_(column, 75), max_(column)]:
+            print(f'{calculated}{format}'.format(values=calculated, format=fmt), end=' |')
 
     
+    
+    print("pandas.describe() output")
+    print(df_out.describe())
 
 
 if __name__ == '__main__':
