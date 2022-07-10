@@ -39,7 +39,7 @@ def max_(X):
     return min_value
 
 def percentile_(X, p):
-    X.sort()
+    X.sort_values()
     k = (len(X) - 1) * (p / 100)
     f = np.floor(k)
     c = np.ceil(k)
@@ -51,5 +51,8 @@ def percentile_(X, p):
     d1 = X[int(c)] * (k - f)
     return d0 + d1
 
+'''
+column is 'NaN column' if it has more than 50% of NaN values 
+'''
 def isnan_column(column):
     return sum([1 for cell in column if math.isnan(cell)]) > len(column) / 2  
