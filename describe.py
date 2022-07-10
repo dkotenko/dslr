@@ -1,7 +1,7 @@
 import csv
 import sys
 import pandas as pd
-from dslr_utils import print_error, print_exit
+from dslr_utils import print_error, print_exit, load_csv
 from dslr_math import *
 import numpy as np
 
@@ -13,21 +13,7 @@ delim = ' | '
     
 
 def describe():
-    if len(sys.argv) > 1:
-        filepath = sys.argv[1]
-    else:
-        print_exit('Usage: ./describe \'filepath\'')
-
-    try:
-        df = pd.read_csv(filepath, delimiter=',', index_col=0)
-    except FileNotFoundError:
-        print_error("Invalid filepath")
-    except PermissionError as e:
-        print_error("Permission denied")
-    except pd.errors.EmptyDataError as e:
-        print_error("File is empty")
-    except Exception:
-        raise RuntimeError("Unknown error, read stacktrace")
+    df = load_csv()
     df_orig = df.copy()
     df = df.select_dtypes('number')
     
