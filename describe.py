@@ -6,9 +6,9 @@ from dslr_math import *
 import numpy as np
 
 default_padding = 12
-fmt = '>12.4f'
-decorized_delim = ' | '
-
+float_fmt = '>12.4f'
+int_fmt = '>12.0'
+delim = ' | '
 
     
 
@@ -28,63 +28,25 @@ def describe():
         print_error("File is empty")
     except Exception:
         raise RuntimeError("Unknown error, read stacktrace")
+    df_orig = df.copy()
+    df = df.select_dtypes('number')
     
-    df_out = df.select_dtypes('number')
-    [print_padding_header(x) for x in df_out]
-    print()
+    df = df.apply(pd.to_numeric)
+    #df = df.append(a_series, ignore_index=True)
     
-    df_out = df_out.apply(pd.to_numeric)
-    for col in df_out:
-        if isnan_column(df_out[col]):
-            df_out.drop(col, axis=1, inplace=True)
-            continue
-    #print(max_columns_len)
+    #df_buf = df_out.copy()
+    #max_columns_len = []
     
+    d = {'Index': ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']}
+    df_buf = pd.DataFrame(d).set_index('Index')
+    df_buf.index.name = None
     
-        max_columns_len = []
-        max_column_len = df_out[col].astype(str).str.len().max()
-        max_columns_len.append(max_column_len)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    #
-    
-    #print(f'{"":15} |{"Count":>12} |{"Mean":>12} |{"Std":>12} |{"Min":>12} |{"25%":>12} |{"50%":>12} |{"75%":>12} |{"Max":>12}')
-    #[print(x) for x in df_out]
-    for index, col_str in enumerate(df_out):
-        column = df_out[col_str].apply(pd.to_numeric)
-        for calculated in [count_(column), mean_(column), std_(column), min_(column),
-                           percentile_(column, 25), percentile_(column, 50),
-                           percentile_(column, 75), max_(column)]:
-            if column.dtype == np.int64:
-                to_print = str(calculated)
-            else:
-                to_print = f'{calculated:.6f}'
-            padding = max_columns_len[index] - len(str(to_print))
-            print(f'{to_print:>{padding}} | ', end= '')
-        print()
-    
-    
-    print("pandas.describe() output")
-    print(df_out.describe())
+    for column in df:
+        df_buf[column] = [count_(df[column]), mean_(df[column]), std_(df[column]), min_(df[column]), percentile_(df[column], 25), percentile_(df[column], 50), percentile_(df[column], 75), max_(df[column])]
+    print(df_buf)
+    print('\n' + '#' * 100)
+    print('\npandas.describe() to compare:\n')
+    print(df_orig.describe())
 
-
-def print_padding_header(header):
-    max_len = max(len(header), default_padding)
-    padding = 0 if max_len != default_padding else default_padding - len(header)
-    print(f'{header:>{padding}} | ', end= '')
-
-def print_padding_row(s, padding):
-    max_len = max(len(header), default_padding)
-    padding = max_len - len(str(s))
-    
-    
 if __name__ == '__main__':
     describe()

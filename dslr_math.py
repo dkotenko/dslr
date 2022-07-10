@@ -7,20 +7,24 @@ def count_(X):
 
 def mean_(X):
     total = 0
+    amount = 0
     for x in X:
         if np.isnan(x):
             continue
-        total = total + x
-    return total / len(X)
+        amount += 1
+        total += x
+    return total / amount if amount > 0 else float('NaN')
 
 def std_(X):
     mean = mean_(X)
     total = 0
+    amount = 0
     for x in X:
         if np.isnan(x):
             continue
         total = total + (x - mean) ** 2
-    return (total / len(X)) ** 0.5
+        amount += 1
+    return (total / amount) ** 0.5 if amount > 0 else float('NaN')
 
 def min_(X):
     min_value = X[0]
@@ -39,11 +43,14 @@ def max_(X):
     return min_value
 
 def percentile_(X, p):
-    X.sort_values()
+    X = [x for x in X if not math.isnan(x)]
+    if not X:
+        return float('NaN')
+    X.sort()
     k = (len(X) - 1) * (p / 100)
     f = np.floor(k)
     c = np.ceil(k)
-
+    
     if f == c:
         return X[int(k)]
 
