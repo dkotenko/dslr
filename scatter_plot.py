@@ -2,17 +2,22 @@ import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def plot_histogram(df, feature):
+def plot_scatter(df, feature1, feature2):
     plt.figure(figsize=(8, 6))
-    df.groupby('Hogwarts House')[feature].plot(kind='hist', alpha=.5);
-    plt.legend();
-    plt.title(feature)
+    if 'Hogwarts House' in df.columns:
+        c = df['Hogwarts House'].map({'Ravenclaw': 'b', 'Slytherin': 'g', 'Gryffindor': 'r', 'Hufflepuff': 'orange'})
+    else:
+        c = None
+    plt.scatter(df[feature1], df[feature2], c=c, alpha=.4)
+    plt.xlabel(feature1)
+    plt.ylabel(feature2)
+    plt.title(f'{feature1} vs {feature2}')
     plt.show()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset', help='dataset to consider')
-    parser.add_argument('--all', '-a', default=False, action='store_true', help="display all histograms")
+    parser.add_argument('--all', '-a', default=False, action='store_true', help="display all scatters")
 
     args = parser.parse_args()
     try:
@@ -39,8 +44,13 @@ if __name__ == '__main__':
                     'Charms',
                     'Flying']
     else:
-        courses = ['Arithmancy', 'Care of Magical Creatures']
+        courses = ['Astronomy', 'Defense Against the Dark Arts']
     
-    for course in courses:
-        plot_histogram(df, course)
-    print("Homogeneous scores: Arithmancy, Care of Magical Creatures")
+    n = len(courses)
+    for xi in range(n):
+        for yj in range(xi, n):
+            x = courses[xi]
+            y = courses[yj]
+            if x != y:
+                plot_scatter(df, x, y)
+    print("Similar features: Astronomy and Defence Against the Dark Arts")
